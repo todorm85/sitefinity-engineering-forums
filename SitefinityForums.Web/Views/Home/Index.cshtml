@@ -1,0 +1,12 @@
+﻿@{
+    ViewData["Title"] = "Home Page";
+}
+
+@model IEnumerable<SitefinityForums.Data.SavedThread>
+
+<div>
+    @foreach (var t in Model)
+    {
+        <a href="@SitefinityForums.Data.Crawler.ForumsCrawler.BaseForumsAddress@t.ID.TrimStart('.').TrimStart('/')">@t.ID</a><br />
+    }
+</div>
