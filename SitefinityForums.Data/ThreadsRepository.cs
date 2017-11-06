@@ -23,7 +23,7 @@ namespace SitefinityForums.Data
             var externalThreads = crawler.GetUnansweredThreads();
             UpdateSavedThreads(savedThreads, externalThreads);
 
-            return savedThreads.Where(x => !x.Closed);
+            return savedThreads.Where(x => !x.Closed && externalThreads.Any(y => y.Id == x.ID));
         }
 
         private void UpdateSavedThreads(IQueryable<SavedThread> savedThreads, IEnumerable<ExternalThread> externalThreads)
