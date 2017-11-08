@@ -22,7 +22,7 @@ namespace SitefinityForums.Web
             services.AddDbContext<SitefinityForumsContext>(options =>
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
-            services.AddTransient<IThreadsRepository, ThreadsRepository>();
+            services.AddTransient<IThreadsService, ThreadsService>();
 
             services.AddMvc();
         }

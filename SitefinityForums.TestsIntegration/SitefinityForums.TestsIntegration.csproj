@@ -13,7 +13,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SitefinityForums.Data\SitefinityForums.Data.csproj" />
+    <ProjectReference Include="..\SitefinityForums.Core\SitefinityForums.Core.csproj" />
+    <ProjectReference Include="..\SitefinityForums.Crawler\SitefinityForums.Crawler.csproj" />
   </ItemGroup>
 
 </Project>

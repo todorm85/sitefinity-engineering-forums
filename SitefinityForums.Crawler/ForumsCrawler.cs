@@ -4,7 +4,7 @@ using System.Linq;
 
 namespace SitefinityForums.Data.Crawler
 {
-    public class ForumsCrawler
+    public class ForumsCrawler : IForumsCrawler
     {
         public const string PageLinksSelector = ".sf_pagerNumeric a";
         public const string ThreadsSelector = "table.sfforumThreadsList tr";
@@ -40,17 +40,17 @@ namespace SitefinityForums.Data.Crawler
             }
         }
 
-        public IEnumerable<ExternalThread> GetUnansweredThreads()
+        public IEnumerable<RemoteForumThread> GetUnansweredThreads()
         {
             return GetThreads().Where(t => !t.IsAnswered);
         }
 
-        public IEnumerable<ExternalThread> GetThreads()
+        public IEnumerable<RemoteForumThread> GetThreads()
         {
             var document = MarkupProvider.GetDomDocument(this.address + "/1");
             var pagesCount = document.QuerySelectorAll(PageLinksSelector).Length;
             pagesCount = pagesCount == 0 ? 1 : pagesCount;
-            var externalThreads = new List<ExternalThread>();
+            var externalThreads = new List<RemoteForumThread>();
             for (int i = 1; i < pagesCount + 1; i++)
             {
                 if (i > 1)
@@ -74,7 +74,7 @@ namespace SitefinityForums.Data.Crawler
                     var postsCountText = mt.QuerySelector(ThreadPostsCountSelector).TextContent.Trim();
                     if (int.TryParse(postsCountText, out var postsCount))
                     {
-                        externalThreads.Add(new ExternalThread()
+                        externalThreads.Add(new RemoteForumThread()
                         {
                             Id = id,
                             Title = title,

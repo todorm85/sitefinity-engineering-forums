@@ -11,9 +11,9 @@ namespace SitefinityForums.Web.Controllers
 {
     public class HomeController : Controller
     {
-        private IThreadsRepository threadsRepository;
+        private IThreadsService threadsRepository;
 
-        public HomeController(IThreadsRepository repo)
+        public HomeController(IThreadsService repo)
         {
             this.threadsRepository = repo;
         }

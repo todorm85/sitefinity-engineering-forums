@@ -4,8 +4,8 @@ using System.Text;
 
 namespace SitefinityForums.Data
 {
-    public interface IThreadsRepository
+    public interface IThreadsService
     {
-        IEnumerable<SavedThread> GetTodoThreads();
+        IEnumerable<LocalForumThread> GetTodoThreads();
     }
 }

@@ -9,6 +9,6 @@ namespace SitefinityForums.Data
         {
         }
 
-        public DbSet<SavedThread> Threads { get; set; }
+        public DbSet<LocalForumThread> Threads { get; set; }
     }
 }

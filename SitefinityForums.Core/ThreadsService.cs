@@ -6,18 +6,18 @@ using SitefinityForums.Data.Crawler;
 
 namespace SitefinityForums.Data
 {
-    public class ThreadsRepository : IThreadsRepository
+    public class ThreadsService : IThreadsService
     {
         private SitefinityForumsContext context;
         private ForumsCrawler crawler;
 
-        public ThreadsRepository(SitefinityForumsContext sfContext)
+        public ThreadsService(SitefinityForumsContext sfContext)
         {
             context = sfContext;
             crawler = new ForumsCrawler();
         }
 
-        public IEnumerable<SavedThread> GetTodoThreads()
+        public IEnumerable<LocalForumThread> GetTodoThreads()
         {
             var savedThreads = context.Threads;
             var externalThreads = crawler.GetUnansweredThreads();
@@ -26,7 +26,7 @@ namespace SitefinityForums.Data
             return savedThreads.Where(x => !x.Closed && externalThreads.Any(y => y.Id == x.ID));
         }
 
-        private void UpdateSavedThreads(IQueryable<SavedThread> savedThreads, IEnumerable<ExternalThread> externalThreads)
+        private void UpdateSavedThreads(IQueryable<LocalForumThread> savedThreads, IEnumerable<RemoteForumThread> externalThreads)
         {
             foreach (var ext in externalThreads)
             {
@@ -48,9 +48,9 @@ namespace SitefinityForums.Data
             context.SaveChanges();
         }
 
-        private void CreateInternalThread(ExternalThread ext)
+        private void CreateInternalThread(RemoteForumThread ext)
         {
-            context.Add(new SavedThread()
+            context.Add(new LocalForumThread()
             {
                 ID = ext.Id,
                 PostsCount = ext.PostsCount,

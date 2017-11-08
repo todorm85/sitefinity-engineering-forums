@@ -1,6 +1,6 @@
 ﻿namespace SitefinityForums.Data.Crawler
 {
-    public class ExternalThread
+    public class RemoteForumThread
     {
         public string Id { get; set; }
         public string Title { get; internal set; }

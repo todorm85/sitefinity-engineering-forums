@@ -1,6 +1,6 @@
 ﻿namespace SitefinityForums.Data
 {
-    public class SavedThread
+    public class LocalForumThread
     {
         public string ID { get; set; }
 
