@@ -1,60 +1,66 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using SitefinityForums.Data.Crawler;
 
 namespace SitefinityForums.Data
 {
     public class ThreadsService : IThreadsService
     {
-        private SitefinityForumsContext context;
+        private IForumThreadsRepository threadsRepo;
         private ForumsCrawler crawler;
 
-        public ThreadsService(SitefinityForumsContext sfContext)
+        public ThreadsService(IForumThreadsRepository threadsRepo)
         {
-            context = sfContext;
+            this.threadsRepo = threadsRepo;
             crawler = new ForumsCrawler();
         }
 
-        public IEnumerable<LocalForumThread> GetTodoThreads()
+        public IEnumerable<ForumThread> GetThreads(Func<ForumThread, bool> filter)
         {
-            var savedThreads = context.Threads;
-            var externalThreads = crawler.GetUnansweredThreads();
-            UpdateSavedThreads(savedThreads, externalThreads);
+            var threads = threadsRepo.GetThreads();
+            var remoteThreads = crawler.GetThreads();
+            SynchronizeThreads(threads, remoteThreads);
 
-            return savedThreads.Where(x => !x.Closed && externalThreads.Any(y => y.Id == x.ID));
+            return threads.Where(filter);
         }
 
-        private void UpdateSavedThreads(IQueryable<LocalForumThread> savedThreads, IEnumerable<RemoteForumThread> externalThreads)
+        public void UpdateThread(ForumThread thread)
         {
-            foreach (var ext in externalThreads)
+            var foundThread = threadsRepo.GetThread(thread.ID);
+            if (foundThread == null)
             {
-                var relatedInternalThread = savedThreads.FirstOrDefault(x => x.ID == ext.Id);
-                if (relatedInternalThread != null)
-                {
-                    if (relatedInternalThread.PostsCount < ext.PostsCount)
-                    {
-                        // external forum has been updated
-                        relatedInternalThread.Closed = false;
-                    }
-                }
-                else
-                {
-                    CreateInternalThread(ext);
-                }
+                throw new NullReferenceException($"Thread with id {thread.ID} not found");
             }
 
-            context.SaveChanges();
+            foundThread.Opened = thread.Opened;
+            threadsRepo.SaveChanges();
         }
 
-        private void CreateInternalThread(RemoteForumThread ext)
+        private static void SynchronizeThreadProperties(RemoteForumThread remoteThread, ForumThread matchedThread)
         {
-            context.Add(new LocalForumThread()
+            matchedThread.Link = remoteThread.Link;
+            matchedThread.PostsCount = remoteThread.PostsCount;
+            matchedThread.Title = remoteThread.Title;
+            matchedThread.IsAnswered = remoteThread.IsAnswered;
+            matchedThread.RemoteId = remoteThread.Id;
+        }
+
+        private void SynchronizeThreads(IEnumerable<ForumThread> threads, IEnumerable<RemoteForumThread> remoteThreads)
+        {
+            foreach (var remoteThread in remoteThreads)
             {
-                ID = ext.Id,
-                PostsCount = ext.PostsCount,
-            });
+                // forum links are the only property of remote forums that does not change and we don`t have access to their ids
+                var matchedThread = threads.FirstOrDefault(x => x.RemoteId == remoteThread.Id);
+                if (matchedThread == null)
+                {
+                    matchedThread = threadsRepo.CreateThread();
+                }
+
+                SynchronizeThreadProperties(remoteThread, matchedThread);
+            }
+
+            threadsRepo.SaveChanges();
         }
     }
 }

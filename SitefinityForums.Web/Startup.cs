@@ -23,6 +23,7 @@ namespace SitefinityForums.Web
                 options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
 
             services.AddTransient<IThreadsService, ThreadsService>();
+            services.AddTransient<IForumThreadsRepository, ForumThreadsRepository>();
 
             services.AddMvc();
         }
@@ -35,13 +36,8 @@ namespace SitefinityForums.Web
                 app.UseDeveloperExceptionPage();
                 app.UseBrowserLink();
             }
-            else
-            {
-                app.UseExceptionHandler("/Home/Error");
-            }
 
             app.UseStaticFiles();
-
             app.UseMvc(routes =>
             {
                 routes.MapRoute(

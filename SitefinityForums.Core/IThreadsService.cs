@@ -6,6 +6,7 @@ namespace SitefinityForums.Data
 {
     public interface IThreadsService
     {
-        IEnumerable<LocalForumThread> GetTodoThreads();
+        IEnumerable<ForumThread> GetThreads(Func<ForumThread, bool> filter);
+        void UpdateThread(ForumThread thread);
     }
 }

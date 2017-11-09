@@ -1,12 +1,88 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Threads List";
 }
 
-@model IEnumerable<SitefinityForums.Data.SavedThread>
-
-<div>
-    @foreach (var t in Model)
-    {
-        <a href="@SitefinityForums.Data.Crawler.ForumsCrawler.BaseForumsAddress@t.ID.TrimStart('.').TrimStart('/')">@t.ID</a><br />
-    }
+<div ng-controller="threadsListController">
+    <div ng-show="error">Error: {{ error }}</div>
+    <div id="filter">
+        <a href="javascript:void" ng-click="toggleShowClosed()">Show/Hide closed.</a>
+    </div>
+    <hr />
+    <div ng-show="threads">
+        <div ng-repeat="thread in threads">
+            <a href="{{thread.link}}">{{thread.title}}</a> |
+            <span ng-show="thread.assignedTo">Assigned to: {{thread.assignedTo}}</span> |
+            <a href="javascript:void" ng-click="toggleOpened(thread)">Click to {{thread.opened ? 'close' : 'open'}}</a>
+        </div>
+    </div>
 </div>
+
+@section Scripts {
+    <script>
+        (function () {
+
+            forumsApp.controller('threadsListController', ['$scope', 'threadsService',
+                function ($scope, threadsService) {
+                    var showClosed = false;
+                    var allThreads;
+                    function getThreads() {
+                        threadsService.getThreads()
+                            .then(function (data) {
+                                allThreads = data;
+                                filterThreads(showClosed);
+                            }, function (err) {
+                                $scope.error = err;
+                            })
+                    }
+
+                    $scope.toggleOpened = function (thread) {
+                        thread.opened = !thread.opened;
+
+                        threadsService.update(thread)
+                            .then(function () {
+                                filterThreads(showClosed);
+                            }, function () {
+                                thread.opened = !thread.opened;
+                                $scope.error = err;
+                            })
+                    }
+
+                    filterThreads = function (showClosed) {
+                        $scope.threads = allThreads.filter(function (thread) {
+                            if (!thread.opened && !showClosed) {
+                                return false;
+                            } else {
+                                return true;
+                            }
+                        })
+                    }
+
+                    $scope.toggleShowClosed = function () {
+                        showClosed = !showClosed;
+                        filterThreads(showClosed);
+                    };
+
+                    getThreads();
+                }
+            ]);
+
+            forumsApp.factory('threadsService', ['$http',
+                function ($http) {
+                    var serviceUrl = './api/threads/';
+                    return {
+                        getThreads: function () {
+                            return $http.get(serviceUrl, {}, {})
+                                .then(function (response) {
+                                    return response.data;
+                                });
+                        },
+                        update: function (thread) {
+                            return $http.post(serviceUrl + 'update', { Id: thread.id, Opened: thread.opened })
+                        }
+                    }
+                }
+            ]);
+
+        })();
+    </script>
+}

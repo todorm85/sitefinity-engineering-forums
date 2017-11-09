@@ -40,11 +40,6 @@ namespace SitefinityForums.Data.Crawler
             }
         }
 
-        public IEnumerable<RemoteForumThread> GetUnansweredThreads()
-        {
-            return GetThreads().Where(t => !t.IsAnswered);
-        }
-
         public IEnumerable<RemoteForumThread> GetThreads()
         {
             var document = MarkupProvider.GetDomDocument(this.address + "/1");
@@ -77,6 +72,7 @@ namespace SitefinityForums.Data.Crawler
                         externalThreads.Add(new RemoteForumThread()
                         {
                             Id = id,
+                            Link = BaseForumsAddress + id.Trim(new char[] { '.', '/' }),
                             Title = title,
                             IsAnswered = isAnswered,
                             PostsCount = postsCount

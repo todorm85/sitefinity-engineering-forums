@@ -15,8 +15,8 @@ namespace SitefinityForums.TestsIntegration
             Assert.IsTrue(threads.Count() > 0);
             foreach (var t in threads)
             {
-                Assert.IsTrue(!string.IsNullOrEmpty(t.Id));
-                Assert.IsTrue(threads.Count(x => x.Id == t.Id) == 1);
+                Assert.IsTrue(!string.IsNullOrEmpty(t.Link));
+                Assert.IsTrue(threads.Count(x => x.Link == t.Link) == 1);
                 Assert.IsTrue(t.PostsCount > 0);
                 Assert.IsTrue(!string.IsNullOrEmpty(t.Title));
             }

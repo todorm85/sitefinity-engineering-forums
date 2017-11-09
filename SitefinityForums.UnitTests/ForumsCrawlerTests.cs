@@ -31,7 +31,7 @@ namespace SitefinityForums.UnitTests
             for (int i = 1; i <= threads.Count; i++)
             {
                 var thread = threads[i - 1];
-                Assert.IsTrue(thread.Id == "id" + i);
+                Assert.IsTrue(thread.Link == "id" + i);
                 Assert.IsTrue(thread.Title == "title" + i);
                 Assert.IsTrue(thread.IsAnswered == (i % 2 == 0));
                 Assert.IsTrue(thread.PostsCount == i);

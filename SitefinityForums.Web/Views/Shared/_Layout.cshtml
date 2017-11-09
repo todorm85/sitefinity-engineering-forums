@@ -36,7 +36,9 @@
         </div>
     </nav>
     <div class="container body-content">
-        @RenderBody()
+        <div ng-app="forumsApp">
+            @RenderBody()
+        </div>
         <hr />
         <footer>
             <p>&copy; 2017 - SitefinityForums</p>
@@ -46,7 +48,7 @@
     <environment include="Development">
         <script src="~/lib/jquery/dist/jquery.js"></script>
         <script src="~/lib/bootstrap/dist/js/bootstrap.js"></script>
-        <script src="~/js/site.js" asp-append-version="true"></script>
+        <script src="~/lib/angular/angular.js"></script>
     </environment>
     <environment exclude="Development">
         <script src="https://ajax.aspnetcdn.com/ajax/jquery/jquery-2.2.0.min.js"
@@ -61,9 +63,19 @@
                 crossorigin="anonymous"
                 integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa">
         </script>
-        <script src="~/js/site.min.js" asp-append-version="true"></script>
+        <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.6/angular.min.js"
+                asp-fallback-src="~/lib/angular/angular.js"
+                asp-fallback-test="window.angular"
+                crossorigin="anonymous"
+                integrity="sha256-PKcnQwI1O4OGwjDP7YRrEiqX/mCmEf9z6IplfVbMOjs=">
+        </script>
     </environment>
 
+    <script>
+        var forumsApp = angular.module('forumsApp', []);
+    </script>
+
     @RenderSection("Scripts", required: false)
+
 </body>
 </html>
