@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
+﻿using System.Collections.Generic;
 using Microsoft.AspNetCore.Mvc;
 using SitefinityForums.Data;
 
@@ -28,10 +24,7 @@ namespace SitefinityForums.Web.Controllers
         [HttpPost("update")]
         public void Update([FromBody]ForumThreadUpdateModel threadModel)
         {
-            var thread = new ForumThread();
-            thread.ID = threadModel.Id;
-            thread.Opened = threadModel.Opened;
-            service.UpdateThread(thread);
+            service.UpdateThread(threadModel.GetDomainModel());
         }
     }
 }

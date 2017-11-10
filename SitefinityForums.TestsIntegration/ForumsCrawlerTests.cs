@@ -10,7 +10,8 @@ namespace SitefinityForums.TestsIntegration
         [TestMethod]
         public void GetThreads_ReturnUniqueObjectsWithPropertiesParsedCorrectly()
         {
-            var crawler = new ForumsCrawler();
+            var provider = new MarkupProvider();
+            var crawler = new ForumsCrawler(provider);
             var threads = crawler.GetThreads();
             Assert.IsTrue(threads.Count() > 0);
             foreach (var t in threads)

@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 
 namespace SitefinityForums.Data.Crawler
 {
@@ -15,34 +14,19 @@ namespace SitefinityForums.Data.Crawler
         public const string ThreadIsAnsweredSelector = "span.sfforumThreadAnswered";
         public const string ThreadPostsCountSelector = "td.sfforumThreadPostsWrp";
         public const string BaseForumsAddress = "https://architecture.sitefinity.com/forums/sitefinity-support-forum-group/sitefinity-unit-3/sitefinity-unit-3/";
+        private const string CacheKey = "cachedThreads";
         private IMarkupProvider markupProvider;
         private string address;
 
-        public ForumsCrawler()
+        public ForumsCrawler(IMarkupProvider markupProvider)
         {
+            this.markupProvider = markupProvider;
             address = BaseForumsAddress + "page/";
-        }
-
-        public IMarkupProvider MarkupProvider
-        {
-            get
-            {
-                if (markupProvider == null)
-                {
-                    markupProvider = new MarkupProvider();
-                }
-
-                return markupProvider;
-            }
-            set
-            {
-                markupProvider = value;
-            }
         }
 
         public IEnumerable<RemoteForumThread> GetThreads()
         {
-            var document = MarkupProvider.GetDomDocument(this.address + "/1");
+            var document = markupProvider.GetDomDocument(this.address + "/1");
             var pagesCount = document.QuerySelectorAll(PageLinksSelector).Length;
             pagesCount = pagesCount == 0 ? 1 : pagesCount;
             var externalThreads = new List<RemoteForumThread>();
@@ -51,7 +35,7 @@ namespace SitefinityForums.Data.Crawler
                 if (i > 1)
                 {
                     var address = this.address + "/" + i;
-                    document = MarkupProvider.GetDomDocument(address);
+                    document = markupProvider.GetDomDocument(address);
                 }
 
                 var threadSelector = ThreadsSelector;

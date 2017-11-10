@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using SitefinityForums.Data;
+using SitefinityForums.Data.Crawler;
 
 namespace SitefinityForums.Web
 {
@@ -24,6 +25,8 @@ namespace SitefinityForums.Web
 
             services.AddTransient<IThreadsService, ThreadsService>();
             services.AddTransient<IForumThreadsRepository, ForumThreadsRepository>();
+            services.AddTransient<IMarkupProvider, MarkupProvider>();
+            services.AddTransient<IForumsCrawler, ForumsCrawler>();
 
             services.AddMvc();
         }

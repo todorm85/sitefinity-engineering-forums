@@ -20,8 +20,7 @@ namespace SitefinityForums.UnitTests
         {
             var testPagesWithThreads = GetPagesWithThreads(5, 2);
             var provider = GetMarkupProviderMock(testPagesWithThreads);
-            var sut = new ForumsCrawler();
-            sut.MarkupProvider = provider;
+            var sut = new ForumsCrawler(provider);
 
             var result = sut.GetThreads();
             Assert.IsTrue(result.Count() == 10);
@@ -60,8 +59,8 @@ namespace SitefinityForums.UnitTests
 
         private IMarkupProvider GetMarkupProviderMock(IDictionary<int, List<IElement>> pagesWithThreads)
         {
-            var sut = new ForumsCrawler();
             var markupProviderMock = new Mock<IMarkupProvider>(MockBehavior.Strict);
+            var sut = new ForumsCrawler(markupProviderMock.Object);
             foreach (var key in pagesWithThreads.Keys)
             {
                 var docMock = this.GetDoc(pagesWithThreads[key]);

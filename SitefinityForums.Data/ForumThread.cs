@@ -28,6 +28,7 @@ namespace SitefinityForums.Data
                 {
                     // forum has new post on remote site
                     this.Opened = true;
+                    this.LastOpened = DateTime.UtcNow;
                 }
 
                 this.postsCount = value;
@@ -36,26 +37,14 @@ namespace SitefinityForums.Data
 
         public string Title { get; set; }
 
-        public bool Opened
-        {
-            get
-            {
-                return this.opened;
-            }
-            set
-            {
-                if (value && !this.opened)
-                {
-                    this.LastOpened = DateTime.UtcNow;
-                }
-
-                this.opened = value;
-            }
-        }
+        public bool Opened { get; set; }
 
         public string AssignedTo { get; set; }
+
         public DateTime LastOpened { get; set; }
+
         public bool IsAnswered { get; set; }
+
         public string RemoteId { get; set; }
     }
 }

@@ -37,6 +37,9 @@
     </nav>
     <div class="container body-content">
         <div ng-app="forumsApp">
+            <div id="msgContainer" class="msg">
+                <div id="msgLabel" ></div>
+            </div>
             @RenderBody()
         </div>
         <hr />
@@ -73,6 +76,46 @@
 
     <script>
         var forumsApp = angular.module('forumsApp', []);
+
+        forumsApp.factory('threadsService', ['$http',
+            function ($http) {
+                var serviceUrl = './api/threads/';
+                return {
+                    getThreads: function () {
+                        return $http.get(serviceUrl, {}, {})
+                            .then(function (response) {
+                                return response.data;
+                            });
+                    },
+                    update: function (thread) {
+                        return $http.post(serviceUrl + 'update', { Id: thread.id, Opened: thread.opened, AssignedTo: thread.assignedTo })
+                    }
+                }
+            }
+        ]);
+
+        forumsApp.factory('msg', ['$timeout',
+            function ($timeout) {
+                return {
+                    showError: function (msg, duration) {
+                        duration = duration > 0 ? duration : 5000;
+
+                        var msgContainer = $('#msgContainer');
+                        var msgLabel = $('#msgLabel');
+                        var errClass = 'alert alert-danger';
+
+                        msgContainer.show();
+                        msgLabel.text('Error: ' + msg);
+                        msgLabel.addClass(errClass);
+                        $timeout(function () {
+                            msgContainer.hide();
+                            msgLabel.text('');
+                            msgLabel.removeClass(errClass);
+                        }, duration);
+                    }
+                }
+            }
+        ]);
     </script>
 
     @RenderSection("Scripts", required: false)

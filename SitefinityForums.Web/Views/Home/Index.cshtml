@@ -2,17 +2,39 @@
     ViewData["Title"] = "Threads List";
 }
 
-<div ng-controller="threadsListController">
-    <div ng-show="error">Error: {{ error }}</div>
-    <div id="filter">
-        <a href="javascript:void" ng-click="toggleShowClosed()">Show/Hide closed.</a>
-    </div>
-    <hr />
-    <div ng-show="threads">
-        <div ng-repeat="thread in threads">
-            <a href="{{thread.link}}">{{thread.title}}</a> |
-            <span ng-show="thread.assignedTo">Assigned to: {{thread.assignedTo}}</span> |
-            <a href="javascript:void" ng-click="toggleOpened(thread)">Click to {{thread.opened ? 'close' : 'open'}}</a>
+<div class="jumbotron">
+    <h2>Unanswered threads</h2>
+    <h5>
+        This is a list of all unanswered threads found on our forum. Opened threads are those that have not yet been attended to.
+        Closed threads are ones that are still not marked as answerted by the poster, but have been responded to.
+        Closed threads that have new post will automatically be marked as opened again.
+    </h5>
+</div>
+
+<div ng-controller="threadsListController" ng-cloak>
+    <div ng-show="loading" class="alert alert-info" role="alert">LOADING... this could take some time as the forums server is not that fast and it needs to be crawled.</div>
+    <div ng-show="!loading">
+        <div id="filter">
+            <a href="javascript:void" ng-click="toggleShowClosed()">Show/Hide closed.</a>
+        </div>
+        <hr />
+        <div ng-show="threads">
+            <ul class="list-group">
+                <li ng-repeat="thread in threads" class="list-group-item">
+                    <span ng-class="['label', {'label-danger': thread.opened, 'label-success': !thread.opened}]">{{thread.opened ? 'OPENED' : 'CLOSED'}}</span>
+                    <a href="{{thread.link}}">{{thread.title}}</a>
+                    |
+                    <button ng-click="toggleOpened(thread)" class="btn btn-sm btn-link">Click to {{thread.opened ? 'close' : 'open'}}</button>
+                    |
+                    <span ng-show="thread.assignedTo && !changingOwner">Owner: {{thread.assignedTo}}</span>
+                    <button ng-click="thread.changingOwner = true">Change owner</button>
+                    <div ng-show="thread.changingOwner">
+                        <input type="text" ng-model="thread.newOwner" />
+                        <button ng-click="changeOwner(thread)">Save</button>
+                        <button ng-click="thread.changingOwner = false">Cancel</button>
+                    </div>
+                </li>
+            </ul>
         </div>
     </div>
 </div>
@@ -21,35 +43,52 @@
     <script>
         (function () {
 
-            forumsApp.controller('threadsListController', ['$scope', 'threadsService',
-                function ($scope, threadsService) {
-                    var showClosed = false;
+            forumsApp.controller('threadsListController', ['$scope', 'threadsService', 'msg',
+                function ($scope, threadsService, msg) {
+                    var showClosedFilter = false;
                     var allThreads;
-                    function getThreads() {
-                        threadsService.getThreads()
-                            .then(function (data) {
-                                allThreads = data;
-                                filterThreads(showClosed);
-                            }, function (err) {
-                                $scope.error = err;
-                            })
+
+                    $scope.changingOwner = false;
+
+                    $scope.changeOwner = function (thread) {
+                        thread.changingOwner = false;
+                        thread.assignedTo = thread.newOwner;
+                        updateThread(thread);
                     }
 
                     $scope.toggleOpened = function (thread) {
                         thread.opened = !thread.opened;
+                        updateThread(thread);
+                    }
 
+                    $scope.toggleShowClosed = function () {
+                        showClosedFilter = !showClosedFilter;
+                        refreshThreads();
+                    };
+
+                    updateThread = function (thread) {
                         threadsService.update(thread)
-                            .then(function () {
-                                filterThreads(showClosed);
-                            }, function () {
-                                thread.opened = !thread.opened;
-                                $scope.error = err;
+                            .catch(function (err) {
+                                msg.showError(err, 5000);
+                                Init();
                             })
                     }
 
-                    filterThreads = function (showClosed) {
+                    function Init() {
+                        $scope.loading = true;
+                        threadsService.getThreads()
+                            .then(function (data) {
+                                allThreads = data;
+                                refreshThreads();
+                                $scope.loading = false;
+                            }, function (err) {
+                                msg.showError(err, 5000);
+                            })
+                    }
+
+                    function refreshThreads() {
                         $scope.threads = allThreads.filter(function (thread) {
-                            if (!thread.opened && !showClosed) {
+                            if (!thread.opened && !showClosedFilter) {
                                 return false;
                             } else {
                                 return true;
@@ -57,32 +96,9 @@
                         })
                     }
 
-                    $scope.toggleShowClosed = function () {
-                        showClosed = !showClosed;
-                        filterThreads(showClosed);
-                    };
-
-                    getThreads();
+                    Init();
                 }
             ]);
-
-            forumsApp.factory('threadsService', ['$http',
-                function ($http) {
-                    var serviceUrl = './api/threads/';
-                    return {
-                        getThreads: function () {
-                            return $http.get(serviceUrl, {}, {})
-                                .then(function (response) {
-                                    return response.data;
-                                });
-                        },
-                        update: function (thread) {
-                            return $http.post(serviceUrl + 'update', { Id: thread.id, Opened: thread.opened })
-                        }
-                    }
-                }
-            ]);
-
         })();
     </script>
 }

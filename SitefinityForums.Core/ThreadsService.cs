@@ -8,18 +8,18 @@ namespace SitefinityForums.Data
     public class ThreadsService : IThreadsService
     {
         private IForumThreadsRepository threadsRepo;
-        private ForumsCrawler crawler;
+        private IForumsCrawler forumsCrawler;
 
-        public ThreadsService(IForumThreadsRepository threadsRepo)
+        public ThreadsService(IForumThreadsRepository threadsRepo, IForumsCrawler crawler)
         {
             this.threadsRepo = threadsRepo;
-            crawler = new ForumsCrawler();
+            forumsCrawler = crawler;
         }
 
         public IEnumerable<ForumThread> GetThreads(Func<ForumThread, bool> filter)
         {
             var threads = threadsRepo.GetThreads();
-            var remoteThreads = crawler.GetThreads();
+            var remoteThreads = forumsCrawler.GetThreads();
             SynchronizeThreads(threads, remoteThreads);
 
             return threads.Where(filter);
@@ -34,6 +34,8 @@ namespace SitefinityForums.Data
             }
 
             foundThread.Opened = thread.Opened;
+            foundThread.AssignedTo = thread.AssignedTo;
+
             threadsRepo.SaveChanges();
         }
 

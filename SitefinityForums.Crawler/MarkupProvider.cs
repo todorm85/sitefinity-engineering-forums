@@ -3,7 +3,7 @@ using AngleSharp.Dom;
 
 namespace SitefinityForums.Data.Crawler
 {
-    internal class MarkupProvider : IMarkupProvider
+    public class MarkupProvider : IMarkupProvider
     {
         public IDocument GetDomDocument(string address)
         {

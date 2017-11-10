@@ -17,3 +17,11 @@
         display: none;
     }
 }
+
+.msg {
+    position: fixed;
+    top: 10%;
+    right: 10%;
+    left: 10%;
+    z-index: 1
+}
