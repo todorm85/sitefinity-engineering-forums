@@ -25,3 +25,15 @@
     left: 10%;
     z-index: 1
 }
+
+.lb-sm {
+    font-size: small;
+}
+
+.lb-md {
+    font-size: medium;
+}
+
+.lb-lg {
+    font-size: larger;
+}

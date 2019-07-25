@@ -2,40 +2,59 @@
     ViewData["Title"] = "Threads List";
 }
 
-<div class="jumbotron">
+<div class="well">
     <h2>Unanswered threads</h2>
-    <h5>
-        This is a list of all unanswered threads found on our forum. Opened threads are those that have not yet been attended to.
-        Closed threads are ones that are still not marked as answerted by the poster, but have been responded to.
-        Closed threads that have new post will automatically be marked as opened again.
-    </h5>
+    <div>
+        <p>This is a list of all threads found on our forum that have not yet been marked as answered by the original posters.</p>
+        <p>
+            Threads that have been set to <span class="label label-success">Done</span> and have new reply since the last time they were marked as done will be set to: <br />
+            <span class="label label-danger">Needs attention</span> If no one is assigned <br />
+            <span class="label label-warning">Not done</span> If there is someone assigned <br />
+        </p>
+        <hr />
+        <p>
+            <strong>TODO:</strong> <span class="label label-warning">Not done</span> or <span class="label label-danger">Needs attention</span> older than 1 week to be marked as <span class="label label-danger lb-lg">Urgent</span>
+        </p>
+    </div>
 </div>
 
 <div ng-controller="threadsListController" ng-cloak>
     <div ng-show="loading" class="alert alert-info" role="alert">LOADING... this could take some time as the forums server is not that fast and it needs to be crawled.</div>
     <div ng-show="!loading">
         <div id="filter">
-            <a href="javascript:void" ng-click="toggleShowClosed()">Show/Hide closed.</a>
+            <button class="btn btn-default" ng-click="toggleShowClosed()">Show/Hide <span class="label label-success">Done</span></button>
         </div>
         <hr />
-        <div ng-show="threads">
-            <ul class="list-group">
-                <li ng-repeat="thread in threads" class="list-group-item">
-                    <span ng-class="['label', {'label-danger': thread.opened, 'label-success': !thread.opened}]">{{thread.opened ? 'OPENED' : 'CLOSED'}}</span>
-                    <a href="{{thread.link}}">{{thread.title}}</a>
-                    |
-                    <button ng-click="toggleOpened(thread)" class="btn btn-sm btn-link">Click to {{thread.opened ? 'close' : 'open'}}</button>
-                    |
-                    <span ng-show="thread.assignedTo && !changingOwner">Owner: {{thread.assignedTo}}</span>
-                    <button ng-click="thread.changingOwner = true">Change owner</button>
-                    <div ng-show="thread.changingOwner">
-                        <input type="text" ng-model="thread.newOwner" />
-                        <button ng-click="changeOwner(thread)">Save</button>
-                        <button ng-click="thread.changingOwner = false">Cancel</button>
-                    </div>
-                </li>
-            </ul>
-        </div>
+        <table ng-show="threads" class="table table-striped table-condensed">
+            <tbody>
+                <tr ng-repeat="thread in threads">
+                    <td>
+                        <button class="btn btn-default btn-sm" ng-click="toggleOpened(thread)">{{thread.opened ? 'Set done' : 'Set not done'}}</button>
+                    </td>
+                    <td>
+                        <button class="btn btn-default btn-sm" ng-show="!thread.changingOwner" ng-click="thread.changingOwner = true">Assign to</button>
+                        <span ng-show="thread.changingOwner">
+                            <input type="text" ng-model="thread.newOwner" /> <br />
+                            <button ng-click="changeOwner(thread)" class="btn btn-xs">Save</button>
+                            <button ng-click="thread.changingOwner = false" class="btn btn-xs">Cancel</button>
+                        </span>
+                    </td>
+                    <td>
+                        |
+                    </td>
+                    <td>
+                        <span class="label label-danger lb-sm" ng-show="thread.opened && !thread.assignedTo">Needs attention</span>
+                        <span class="label label-warning lb-sm" ng-show="thread.opened && thread.assignedTo">Not done</span>
+                        <span class="label label-success lb-sm" ng-show="!thread.opened">Done</span>
+                    </td>
+                    <td>
+                        <a href="{{thread.link}}"><strong>{{thread.title}}</strong></a>
+                    </td>
+                    <td>
+                        <span ng-show="thread.assignedTo" class="badge">{{thread.assignedTo}}</span>
+                    </td>
+            </tbody>
+        </table>
     </div>
 </div>
 
@@ -68,7 +87,9 @@
 
                     updateThread = function (thread) {
                         threadsService.update(thread)
-                            .catch(function (err) {
+                            .then(function () {
+                                refreshThreads();
+                            }, function (err) {
                                 msg.showError(err, 5000);
                                 Init();
                             })
